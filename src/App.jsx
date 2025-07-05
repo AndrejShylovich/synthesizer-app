@@ -1,16 +1,18 @@
 import "./App.scss";
-import Osc1 from "./components/Osc1";
+import Oscillator from "./components/Oscillator";
 import Filter from "./components/Filter";
 import Keyboard from "./components/Keyboard";
 import ADSR from "./components/ADSR";
+import Info from "./components/Info";
 
 function App() {
   return (
     <div className="App">
-      <Keyboard />
-      <Osc1 />
-      <ADSR />
-      <Filter />
+        <Keyboard />
+        <Oscillator />
+        <ADSR />
+        <Filter />
+        <Info />
     </div>
   );
 }

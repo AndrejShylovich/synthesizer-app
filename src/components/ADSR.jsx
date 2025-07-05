@@ -1,62 +1,46 @@
-import { useContext } from "react";
+import { useContext, useCallback } from "react";
 import { CTX } from "../store/Store";
+import { ADSR_PARAMS } from "../utils/constants";
 
 const ADSR = () => {
   const [appState, updateState] = useContext(CTX);
-  let { attack, decay, sustain, release } = appState.envelope;
+  
+  const { envelope } = appState;
 
-  const change = (e) => {
-    let { id, value } = e.target;
-    console.log(attack, decay, sustain, release)
-    updateState({ type: "CHANGE_ADSR", payload: { id, value } });
-  };
+  const handleEnvelopeChange = useCallback((e) => {
+    const { id, value } = e.target;
+    updateState({ 
+      type: "CHANGE_ADSR", 
+      payload: { id, value: parseFloat(value) } 
+    });
+  }, [updateState]);
+
+  const renderParameter = useCallback((param) => {
+    const currentValue = envelope[param.id];
+    
+    return (
+      <div key={param.id} className="params">
+        <label htmlFor={param.id}>
+          <h3>{param.id} : {currentValue}</h3>
+        </label>
+        <input
+          id={param.id}
+          type="range"
+          min={param.min || 0}
+          max={param.max}
+          step={param.step}
+          value={currentValue}
+          onChange={handleEnvelopeChange}
+          aria-label={`${param.id} control`}
+        />
+      </div>
+    );
+  }, [envelope, handleEnvelopeChange]);
+
   return (
     <div className="control">
       <h2>ADSR</h2>
-      <div className="params">
-        <h3>attack</h3>
-        <input
-          onChange={change}
-          type="range"
-          id="attack"
-          max='2'
-          step='0.02'
-          value={attack}
-        />
-      </div>
-      <div className="params">
-        <h3>decay</h3>
-        <input
-          onChange={change}
-          type="range"
-          id="decay"
-          max='1'
-          step='0.01'
-          value={decay}
-        />
-      </div>
-      <div className="params">
-        <h3>sustain</h3>
-        <input
-          onChange={change}
-          type="range"
-          id="sustain"
-          max='1'
-          step='0.01'
-          value={sustain}
-        />
-      </div>
-      <div className="params">
-        <h3>release</h3>
-        <input
-          onChange={change}
-          type="range"
-          id="release"
-          max='2'
-          step='0.02'
-          value={release}
-        />
-      </div>
+      {ADSR_PARAMS.map(renderParameter)}
     </div>
   );
 };

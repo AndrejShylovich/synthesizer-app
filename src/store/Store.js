@@ -1,13 +1,13 @@
 import React from "react";
 import Osc from "./Osc";
 
-let actx = new AudioContext();
-let gain1 = actx.createGain();
-let filter = actx.createBiquadFilter();
-let out = actx.destination;
+let audioContext = new AudioContext();
+let gainNode = audioContext.createGain();
+let filter = audioContext.createBiquadFilter();
+let out = audioContext.destination;
 
-gain1.connect(filter);
-gain1.gain.value = 0.2;
+gainNode.connect(filter);
+gainNode.gain.value = 0.2;
 filter.connect(out);
 
 const CTX = React.createContext();
@@ -20,12 +20,12 @@ export function reducer(state, action) {
   switch (action.type) {
     case "MAKE_OSC":
       const newOsc = new Osc(
-        actx,
-        state.osc1Settings.type,
+        audioContext,
+        state.oscSettings.type,
         freq,
-        state.osc1Settings.detune,
+        state.oscSettings.detune,
         state.envelope,
-        gain1
+        gainNode
       );
       nodes.push(newOsc);
       return { ...state };
@@ -40,10 +40,10 @@ export function reducer(state, action) {
       });
       nodes = newNodes;
       return { ...state };
-    case "CHANGE_OSC1":
-      return { ...state, osc1Settings: { ...state.osc1Settings, [id]: value } };
-    case "CHANGE_OSC1_TYPE":
-      return { ...state, osc1Settings: { ...state.osc1Settings, type: id } };
+    case "CHANGE_OSC":
+      return { ...state, oscSettings: { ...state.oscSettings, [id]: value } };
+    case "CHANGE_OSC_TYPE":
+      return { ...state, oscSettings: { ...state.oscSettings, type: id } };
     case "CHANGE_FILTER":
       filter[id].value = value;
       return {
@@ -69,7 +69,7 @@ export function reducer(state, action) {
 
 export default function Store(props) {
   const stateHook = React.useReducer(reducer, {
-    osc1Settings: {
+    oscSettings: {
       detune: 0,
       type: "sine",
     },
@@ -87,5 +87,6 @@ export default function Store(props) {
       release: 0.1,
     },
   });
+
   return <CTX.Provider value={stateHook}>{props.children}</CTX.Provider>;
 }

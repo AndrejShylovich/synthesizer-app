@@ -3,8 +3,7 @@ import { CTX } from "../store/Store";
 import QwertyHancock from "qwerty-hancock";
 
 const Keyboard = () => {
-    // eslint-disable-next-line
-  const [appState, updateState] = useContext(CTX);
+  const [, updateState] = useContext(CTX);
 
   useEffect(() => {
     const keyboard = new QwertyHancock({
@@ -24,8 +23,7 @@ const Keyboard = () => {
     keyboard.keyUp = (note, freq) => {
       updateState({ type: "KILL_OSC", payload: { note, freq } });
     };
-    // eslint-disable-next-line
-  }, []);
+  }, [updateState]);
 
   return (
     <div className="keyboard">

@@ -1,103 +1,79 @@
-import { useContext } from "react";
+import { useContext, useCallback } from "react";
 import { CTX } from "../store/Store";
+import { FILTER_SLIDERS, FILTER_TYPES } from "../utils/constants";
 
 const Filter = () => {
   const [appState, updateState] = useContext(CTX);
+  const { filterSettings } = appState;
+  const { type: activeFilterType } = filterSettings;
 
-  const { frequency, Q, gain, detune, type } = appState.filterSettings;
+  const handleSliderChange = useCallback((e) => {
+    const { id, value } = e.target;
+    updateState({ 
+      type: "CHANGE_FILTER", 
+      payload: { id, value: parseFloat(value) } 
+    });
+  }, [updateState]);
 
-  const change = (e) => {
-    let { id, value } = e.target;
-    updateState({ type: "CHANGE_FILTER", payload: { id, value } });
-  };
+  const handleFilterTypeChange = useCallback((filterType) => {
+    updateState({ 
+      type: "CHANGE_FILTER_TYPE", 
+      payload: { id: filterType } 
+    });
+  }, [updateState]);
 
-  const changeType = (e) => {
-    let { id } = e.target;
-    updateState({ type: "CHANGE_FILTER_TYPE", payload: { id } });
-  };
+  const renderSlider = useCallback((param) => {
+    const currentValue = filterSettings[param.id];
+    
+    return (
+      <div key={param.id} className="params">
+        <label htmlFor={param.id}>
+          <h3>{param.id} : {currentValue}</h3>
+        </label>
+        <input
+          id={param.id}
+          type="range"
+          min={param.min || 0}
+          max={param.max}
+          step={param.step}
+          value={currentValue}
+          onChange={handleSliderChange}
+          aria-label={`${param.id} filter control`}
+        />
+      </div>
+    );
+  }, [filterSettings, handleSliderChange]);
+
+  const renderFilterTypeButton = useCallback((filterType) => {
+    const isActive = activeFilterType === filterType;
+    
+    return (
+      <button
+        key={filterType}
+        type="button"
+        onClick={() => handleFilterTypeChange(filterType)}
+        className={isActive ? "active" : ""}
+        aria-pressed={isActive}
+        aria-label={`Select ${filterType} filter`}
+      >
+        {filterType}
+      </button>
+    );
+  }, [activeFilterType, handleFilterTypeChange]);
 
   return (
     <div className="control">
       <h2>Filter</h2>
-      <div className="params">
-        <h3>frequency</h3>
-        <input
-          value={frequency}
-          onChange={change}
-          max="10000"
-          type="range"
-          id="frequency"
-        />
+      
+      <div className="filter-sliders">
+        {FILTER_SLIDERS.map(renderSlider)}
       </div>
-      <div className="params">
-        <h3>detune</h3>
-        <input
-          value={detune}
-          onChange={change}
-          type="range"
-          id="detune"
-          max="10000"
-        />
-      </div>
-      <div className="params">
-        <h3>Q</h3>
-        <input
-          value={Q}
-          onChange={change}
-          max="10"
-          type="range"
-          id="Q"
-          step={0.1}
-        />
-      </div>
-      <div className="params">
-        <h3>gain</h3>
-        <input
-          value={gain}
-          onChange={change}
-          max="10"
-          type="range"
-          id="gain"
-          step={0.1}
-        />
-      </div>
-      <div className="param">
-        <h3>type</h3>
-        <button
-          id="lowpass"
-          onClick={changeType}
-          className={`${type === "lowpass" && "active"}`}
-        >
-          lowpass
-        </button>
-        <button
-          id="highpass"
-          onClick={changeType}
-          className={`${type === "highpass" && "active"}`}
-        >
-          highpass
-        </button>
-        <button
-          id="notch"
-          onClick={changeType}
-          className={`${type === "notch" && "active"}`}
-        >
-          notch
-        </button>
-        <button
-          id="lowshelf"
-          onClick={changeType}
-          className={`${type === "lowshelf" && "active"}`}
-        >
-          lowshelf
-        </button>
-        <button
-          id="highshelf"
-          onClick={changeType}
-          className={`${type === "highshelf" && "active"}`}
-        >
-          highshelf
-        </button>
+      
+      <div className="filter-types">
+        <h3>Filter Type</h3>
+        <div className="button-group" role="group" aria-label="Filter type selection">
+          {FILTER_TYPES.map(renderFilterTypeButton)}
+        </div>
       </div>
     </div>
   );
